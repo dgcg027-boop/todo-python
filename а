@@ -1,0 +1,34 @@
+def add_todos(todos, count):
+    for i in range(count):
+        task = input("Дело:")
+        todos.append(task)
+
+def show_todos(todos):
+    print("Список дел:")
+    for i, task in enumerate (todos, start=1):
+        print (f"{i}. {task}")
+
+def mark_done(todos):
+    done = input("Что выполнено?")
+    if done == "хватит":
+        print(f"Выходим. Осталось дел: {len(todos)}")
+        return False
+    if done in todos:
+        todos.remove(done)
+        print(f"{done} - удалено.")
+    else:
+        print("Такого дела нет")
+
+    return True
+
+todos = []
+add_todos(todos,3)
+
+while len(todos) > 0:
+    show_todos(todos)
+
+    if not mark_done(todos):
+        break
+
+if len(todos) == 0:
+    print("Всё выполнено!")
