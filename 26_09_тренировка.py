@@ -1,8 +1,9 @@
-text = input("Введите текст ")
-count = 0
-vowels = "аеёиоуыэюя"
-for letter in text:
-    if letter in vowels:
-        count +=1
 
-print(f"результат: {count}")
+def average(numbers):
+    mid = sum(numbers)/len(numbers)
+    return mid
+
+numbers = [10, 20, 30, 40]
+average(numbers)
+result = average(numbers)
+print(f"Среднее арифмитическое равно {result}")
