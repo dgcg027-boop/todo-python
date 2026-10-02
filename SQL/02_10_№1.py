@@ -23,4 +23,19 @@ rows = cursor.fetchall()
 for row in rows:
     print(row)
 
+print("Студенты старше 20 лет:")
+cursor.execute("SELECT * FROM students WHERE age > 20")
+for row in cursor.fetchall():
+    print(row)
+
+print("\nСортировка по возрасту (по возрастанию):")
+cursor.execute("SELECT * FROM students ORDER BY age")
+for row in cursor.fetchall():
+    print(row)
+
+print("\nСортировка по возрасту (по убыванию):")
+cursor.execute("SELECT * FROM students ORDER BY age DESC")
+for row in cursor.fetchall():
+    print(row)
+
 conn.close()
