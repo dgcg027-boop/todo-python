@@ -1,7 +1,7 @@
 name = input("Введи имя студента: ").lower()
 marks = []
 for i in range(3):   
-    mark = int(input("Введи оценкe: "))
+    mark = int(input("Введи оценку: "))
     marks.append(mark)
 mid = round(sum(marks)/len(marks), 2)
 with open("student.txt", "w") as f:

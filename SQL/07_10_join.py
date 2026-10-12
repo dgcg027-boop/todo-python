@@ -38,7 +38,7 @@ cursor.execute("""
 for row in cursor.fetchall():
     print(row)
 
-print("\nКоличесвто закзаов у каждого клиента:")
+print("\nКоличество закзаов у каждого клиента:")
 cursor.execute("""
     SELECT customers.name, COUNT(*)
     FROM customers
@@ -57,5 +57,5 @@ GROUP BY customers.id
 """)
 for row in cursor.fetchall():
     print(row)
-    
+
 conn.close()

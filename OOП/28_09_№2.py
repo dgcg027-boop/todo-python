@@ -7,8 +7,8 @@ class Todo:
         self.done = True
 
     def info(self):
-        if self.done == False:
-            print(f"[] {self.title}")
+        if not self.done:
+            print(f"[ ] {self.title}")             
         else:
             print(f"[x] {self.title}")
 
