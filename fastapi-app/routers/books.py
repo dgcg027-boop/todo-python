@@ -1,16 +1,30 @@
-from fastapi import APIRouter
-from models import Book
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from models import Book, BookDB
+from database import SessionLocal
 
 router = APIRouter()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally: 
+        db.close()
 
 @router.get("/")
 async def read_root():
     return {"message": "Книжный магазин"}
 
 @router.post("/books")
-async def create_book(book: Book):
-    return {"message": f"Книга '{book.title}' добавлена", "price": book.price}
+async def create_book(book: Book, db: Session = Depends(get_db)):
+    db_book = BookDB(title=book.title, author=book.author, price=book.price)
+    db.add(db_book)
+    db.commit()
+    db.refresh(db_book)
+    return {"message": f"Книга '{book.title}' добавлена в БД", "id": db_book.id}
 
-@router.get("/books/{books_id}")
-async def get_book(book_id: int):
-    return  {"book_id": book_id, "status": "OK"}
+@router.get("/books")
+async def get_books(db: Session = Depends(get_db)):
+    books = db.query(BookDB).all()
+    return [{"id": b.id, "title": b.title, "author": b.author, "price": b.price} for b in books]
