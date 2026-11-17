@@ -1,8 +1,9 @@
 fastapi
 uvicorn
-sqlalchemy
+sqlalchemy[asyncio]
 asyncpg
 alembic
 pytest
 pytest-asyncio
 httpx
+greenlet
