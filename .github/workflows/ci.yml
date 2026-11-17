@@ -34,4 +34,4 @@ jobs:
 
       - run: cd fastapi-practice-5 && pytest test_main.py -v
         env:
-          DATABASE_URL: postgresql+psycopg://myuser:mypassword@localhost:5432/mydb
+          DATABASE_URL: postgresql+asyncpg://myuser:mypassword@localhost:5432/mydb
