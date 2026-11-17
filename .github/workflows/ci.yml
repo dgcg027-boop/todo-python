@@ -32,6 +32,6 @@ jobs:
 
       - run: pip install -r fastapi-practice-5/requirements.txt
 
-      - run: cd fastapi-practice-5 && pytest test_main.py -v
+      - run: cd fastapi-practice-5 && pytest test_main.py -v -c ../pytest.ini
         env:
           DATABASE_URL: postgresql+asyncpg://myuser:mypassword@localhost:5432/mydb
