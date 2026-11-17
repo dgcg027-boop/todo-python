@@ -1,47 +1,48 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from models import TaskCreate, TaskDB, TaskResponse
-from database import SessionLocal
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from models import TaskDB, TaskCreate, TaskResponse
+from database import get_db
 
 router = APIRouter()
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-@router.post("/tasks", response_model = TaskResponse)
-async def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    db_task = TaskDB(title = task.title, description = task.description, priority = task.priority)
+@router.post("/tasks", response_model=TaskResponse)
+async def create_task(task: TaskCreate, db: AsyncSession = Depends(get_db)):
+    db_task = TaskDB(title=task.title, priority = task.priority, description = task.description)
     db.add(db_task)
-    db.commit()
-    db.refresh(db_task)
+    await db.commit()
+    await db.refresh(db_task)
     return db_task
 
-@router.get("/tasks", response_model = list[TaskResponse])
-async def get_tasks(is_done: bool | None = None, db: Session = Depends(get_db)):
-    query = db.query(TaskDB)
+@router.get("/tasks", response_model=list[TaskResponse])
+async def get_task(is_done: bool | None = None, db: AsyncSession = Depends(get_db)):
+    query = select(TaskDB)
     if is_done is not None:
         query = query.filter(TaskDB.is_done==is_done)
-    return query.all()
+    result = await db.execute(query)
+    return result.scalars().all()
 
-@router.put("/tasks/{task_id}", response_model = TaskResponse)
-async def update_task(task_id: int, task: TaskCreate, db: Session = Depends(get_db)):
-    db_task = db.query(TaskDB).filter(TaskDB.id == task_id).first()
-    if not db_task: raise HTTPException(status_code=404, detail = "Task not found")
+@router.put("/tasks/{task_id}", response_model=TaskResponse)
+async def update_task(task_id:int, task: TaskCreate, db: AsyncSession = Depends(get_db)):
+    query = select(TaskDB).filter(TaskDB.id == task_id)
+    result = await db.execute(query)
+    db_task = result.scalar_one_or_none()
+    if not db_task:
+        raise HTTPException(status_code=404, detail = "Task not found")
     db_task.title = task.title
-    db_task.description = task.description
     db_task.priority = task.priority
-    db.commit()
-    db.refresh(db_task)
+    db_task.description = task.description
+    await db.commit()
+    await db.refresh(db_task)
     return db_task
 
 @router.delete("/tasks/{task_id}")
-async def delete_task(task_id: int, db: Session = Depends(get_db)):
-    db_task = db.query(TaskDB).filter(TaskDB.id == task_id).first()
-    if not db_task: raise HTTPException(status_code=404, detail="Task not found")
-    db.delete(db_task)
-    db.commit()
+async def delete_task(task_id: int, db: AsyncSession = Depends(get_db)):
+    query = select(TaskDB).filter(TaskDB.id == task_id)
+    result = await db.execute(query)
+    db_task = result.scalar_one_or_none()
+    if not db_task:
+        raise HTTPException(status_code=404, detail = "Task not found")
+    await db.delete(db_task)
+    await db.commit()
     return {"message": "Task deleted"}

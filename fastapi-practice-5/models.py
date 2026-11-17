@@ -1,26 +1,26 @@
 from pydantic import BaseModel
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, String, Boolean, Integer
 from database import Base
-
-class TaskDB(Base):
-    __tablename__="tasks"
-    id = Column(Integer, primary_key = True, index = True)
-    title = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    is_done = Column(Boolean, default=False)
-    priority = Column(Integer, default=1)
 
 class TaskCreate(BaseModel):
     title: str
-    description: str | None = None
     priority: int = 1
+    description: str | None = None 
 
 class TaskResponse(BaseModel):
     id: int
     title: str
-    discription: str | None = None
+    description: str | None = None
     is_done: bool
-    priority: int
+    priority: int 
 
+class TaskDB(Base):
+    __tablename__ = "tasks"
+    id = Column(Integer, primary_key=True, index = True)
+    title = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    is_done = Column(Boolean, default=False)
+    priority = Column(Integer, default = 1)
     class Config:
-        from_atributes = True
+            from_attributes = True
+

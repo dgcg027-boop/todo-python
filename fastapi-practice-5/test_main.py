@@ -1,41 +1,51 @@
-from fastapi.testclient import TestClient
+import pytest
+from httpx import AsyncClient, ASGITransport
 from main import app
 
-client = TestClient(app)
+@pytest.fixture
+async def client():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        yield ac
 
-def test_create_tasks():
-    response = client.post(
+@pytest.mark.asyncio
+async def test_create_task(client: AsyncClient):
+    response = await client.post(
         "/tasks",
-        json = {"title": "Название", "description": "Описание", "priority": 1}
+        json={"title": "Название", "description": "Описание", "priority": 1}
     )
     assert response.status_code == 200
     assert "id" in response.json()
 
-def test_get_tasks():
-    response = client.get("/tasks")
+@pytest.mark.asyncio
+async def test_get_tasks(client: AsyncClient):
+    response = await client.get("/tasks")
     assert response.status_code == 200
-    assert isinstance(response.json(),list)
+    assert isinstance(response.json(), list)
 
-def test_update_task():
-    client_response = client.post(
+@pytest.mark.asyncio
+async def test_update_task(client: AsyncClient):
+    create_response = await client.post(
         "/tasks",
-        json={"title": "Для обновления", "description": "Тест", "priority": 1}
+        json = {"title": "Для обновления", "description": "Тест", "priority": 1}
     )
-    task_id = client_response.json()["id"]
+    task_id = create_response.json()["id"]
 
-    response = client.put(
+    response = await client.put(
         f"/tasks/{task_id}",
-        json={"title": "Обновлено", "description": "Новое", "priority": 2}
+        json = {"title": "Обновлено", "description": "Новое", "priority": 2}
     )
     assert response.status_code == 200
 
-def test_delete_task():
-    client_response = client.post(
+@pytest.mark.asyncio
+async def test_delete_task(client: AsyncClient):
+    create_response = await client.post(
         "/tasks",
-        json={"title": "Для удаления", "description": "Тест", "priority": 1}
+        json = {"title": "Для удаления", "description": "Тест", "priority": 1}
     )
-    task_id = client_response.json()["id"]
+    task_id = create_response.json()["id"]
 
-    response = client.delete(f"/tasks/{task_id}")
+    response = await client.delete(f"/tasks/{task_id}")
     assert response.status_code == 200
     assert "deleted" in response.json()["message"]
+
