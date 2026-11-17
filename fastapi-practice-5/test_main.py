@@ -1,13 +1,19 @@
 import pytest
 from httpx import AsyncClient, ASGITransport
 from main import app
+from database import engine, Base
+import models
 
-@pytest.fixture
-async def client():
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        yield ac
-
+# Фикстура для создания таблиц перед тестами
+@pytest.fixture(scope="session", autouse=True)
+async def init_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # (опционально) удалить таблицы после тестов
+    # async with engine.begin() as conn:
+    #     await conn.run_sync(Base.metadata.drop_all)
+    
 @pytest.mark.asyncio
 async def test_create_task(client: AsyncClient):
     response = await client.post(
