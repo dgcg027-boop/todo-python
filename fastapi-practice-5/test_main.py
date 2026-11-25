@@ -1,11 +1,12 @@
 import pytest
+import pytest_asyncio 
 from httpx import AsyncClient, ASGITransport
 from main import app
 from database import engine, Base
 import models
 
 # Фикстура для создания таблиц перед тестами
-@pytest.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="session", autouse=True)
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
